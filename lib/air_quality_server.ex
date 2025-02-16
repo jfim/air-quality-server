@@ -62,10 +62,10 @@ defmodule AirQualityServer do
     {:ok, timestamp} = Timex.local() |> Timex.format("{ISO:Extended}")
     full_line = "#{timestamp},#{line}"
 
-    members = :pg2.get_members(:air_quality_line_notifications)
+    members = :pg.get_members(:air_quality_line_notifications)
 
     case members do
-      [pids | rest] ->
+      [_pids] ->
         Enum.each(members, fn pid -> GenServer.cast(pid, {:air_quality_log_line, full_line}) end)
 
       # Ignored

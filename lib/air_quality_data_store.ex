@@ -14,9 +14,7 @@ defmodule AirQualityDataStore do
     curr_file = open_log_file("#{curr_date}.csv")
 
     # Register for notifications
-    :pg2.start()
-    :pg2.create(:air_quality_line_notifications)
-    :pg2.join(:air_quality_line_notifications, self())
+    :pg.join(:air_quality_line_notifications, self())
 
     {:ok, {curr_file, curr_date}}
   end

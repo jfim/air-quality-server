@@ -1,0 +1,21 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  air_quality_server:
+    build: .
+    ports:
+      - "${SERVER_PORT}:1234"
+      - "${ERLANG_DIST_PORT}:9000"
+    restart: always
+    env_file:
+      - .env
+    networks:
+      air_quality_network:
+        aliases:
+          - ${HOSTNAME}.${NAMESPACE}
+
+networks:
+  air_quality_network:
+    driver: bridge
+

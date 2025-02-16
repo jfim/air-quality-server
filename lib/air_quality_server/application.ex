@@ -16,6 +16,10 @@ defmodule AirQualityServer.Application do
 
     # List all child processes to be supervised
     children = [
+      %{
+         id: :pg,
+         start: {:pg, :start_link, []}
+      },
       {Cluster.Supervisor, [topologies, [name: AirQualityServer.ClusterSupervisor]]},
       {AirQualityDataStore, name: AirQualityDataStore.Worker},
       {Task.Supervisor, name: AirQualityServer.TaskSupervisor},
