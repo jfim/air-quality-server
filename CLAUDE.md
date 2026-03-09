@@ -5,7 +5,7 @@ Elixir OTP application that receives air quality sensor data over TCP and logs i
 ## Architecture
 
 - **AirQualityServer** (`lib/air_quality_server.ex`) — TCP server on port 1234. Accepts connections, reads line-delimited sensor data, prepends ISO timestamps, broadcasts via `:pg` group, and sends "ok\n" ack.
-- **AirQualityDataStore** (`lib/air_quality_data_store.ex`) — GenServer subscribed to `:pg` group. Writes timestamped lines to daily CSV files (`YYYY-MM-DD.csv`) with 1MB write buffer and 15-min flush. Auto-rolls at midnight.
+- **AirQualityDataStore** (`lib/air_quality_data_store.ex`) — GenServer subscribed to `:pg` group. Writes timestamped lines to daily CSV files (`YYYY-MM-DD.csv`) with configurable write buffer and flush interval. Auto-rolls at midnight.
 - **Application** (`lib/air_quality_server/application.ex`) — OTP supervisor. Starts `:pg`, libcluster (Gossip strategy), AirQualityDataStore, Task.Supervisor, and the TCP accept loop.
 
 ## Data Flow
@@ -23,7 +23,14 @@ mix deps.get
 mix run --no-halt
 ```
 
-Or with Docker: `docker-compose up`
+Or with Docker:
+
+```bash
+cp .env.example .env
+docker-compose up
+```
+
+CSV logs are persisted via a Docker volume mounted at `/data`.
 
 ## Environment Variables
 
