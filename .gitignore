@@ -30,3 +30,5 @@ air_quality_server-*.tar
 nohup.out
 .aider*
 .env
+.idea/
+*.iml
