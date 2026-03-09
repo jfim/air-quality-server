@@ -38,6 +38,9 @@ exec elixir \
     -S mix run --no-halt' > /app/docker-entrypoint.sh && \
     chmod +x /app/docker-entrypoint.sh
 
+# Create default log directory
+RUN mkdir -p /data
+
 # Expose the TCP port and Erlang distribution port
 EXPOSE 1234 9000
 
