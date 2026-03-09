@@ -10,39 +10,44 @@ defmodule AirQualityDataStore do
   end
 
   def init(:ok) do
+    log_dir = System.get_env("LOG_DIR", ".")
+    buffer_size = get_env_int("LOG_BUFFER_SIZE_BYTES", 1024 * 1024)
+    flush_interval = get_env_int("LOG_FLUSH_INTERVAL_SECONDS", 15 * 60) * 1000
+    File.mkdir_p!(log_dir)
+
+    log_opts = {log_dir, buffer_size, flush_interval}
     curr_date = Timex.today()
-    curr_file = open_log_file("#{curr_date}.csv")
+    curr_file = open_log_file(log_opts, "#{curr_date}.csv")
 
     # Register for notifications
     :pg.join(:air_quality_line_notifications, self())
 
-    {:ok, {curr_file, curr_date}}
+    {:ok, {curr_file, curr_date, log_opts}}
   end
 
-  def handle_cast({:air_quality_log_line, line}, {curr_file, file_date}) do
+  def handle_cast({:air_quality_log_line, line}, {curr_file, file_date, log_opts}) do
     curr_date = Timex.today()
 
     # Close the current file and open a new one if the date has changed
     curr_file =
       if curr_date != file_date do
         File.close(curr_file)
-        open_log_file("#{curr_date}.csv")
+        open_log_file(log_opts, "#{curr_date}.csv")
       else
         curr_file
       end
 
     IO.write(curr_file, line)
 
-    {:noreply, {curr_file, curr_date}}
+    {:noreply, {curr_file, curr_date, log_opts}}
   end
 
-  defp open_log_file(file_name) do
-    file_exists = File.exists?(file_name)
+  defp open_log_file({log_dir, buffer_size, flush_interval}, file_name) do
+    file_path = Path.join(log_dir, file_name)
+    file_exists = File.exists?(file_path)
 
-    # Open the log file
-    # , :compressed])
     {:ok, curr_file} =
-      File.open(file_name, [:append, {:delayed_write, 1024 * 1024, 15 * 60 * 1000}])
+      File.open(file_path, [:append, {:delayed_write, buffer_size, flush_interval}])
 
     # Write header if the file was just created
     if !file_exists do
@@ -53,5 +58,12 @@ defmodule AirQualityDataStore do
     end
 
     curr_file
+  end
+
+  defp get_env_int(name, default) do
+    case System.get_env(name) do
+      nil -> default
+      val -> String.to_integer(val)
+    end
   end
 end

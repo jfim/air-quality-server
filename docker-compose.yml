@@ -10,10 +10,15 @@ services:
     restart: always
     env_file:
       - .env
+    volumes:
+      - air_quality_data:/data
     networks:
       air_quality_network:
         aliases:
           - ${HOSTNAME}.${NAMESPACE}
+
+volumes:
+  air_quality_data:
 
 networks:
   air_quality_network:

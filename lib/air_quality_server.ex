@@ -65,7 +65,7 @@ defmodule AirQualityServer do
     members = :pg.get_members(:air_quality_line_notifications)
 
     case members do
-      [_pids] ->
+      [_ | _] ->
         Enum.each(members, fn pid -> GenServer.cast(pid, {:air_quality_log_line, full_line}) end)
 
       # Ignored
