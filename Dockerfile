@@ -40,6 +40,7 @@ exec elixir \
 
 # Create default log directory
 RUN mkdir -p /data
+ENV LOG_DIR=/data
 
 # Expose the TCP port and Erlang distribution port
 EXPOSE 1234 9000
