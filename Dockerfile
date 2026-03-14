@@ -1,5 +1,5 @@
 # Dockerfile
-FROM elixir:1.17.3-otp-25
+FROM elixir:1.17.3-otp-27
 
 # Install build dependencies
 RUN apt-get update && \

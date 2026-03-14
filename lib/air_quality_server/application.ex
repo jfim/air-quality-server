@@ -8,11 +8,15 @@ defmodule AirQualityServer.Application do
   def start(_type, _args) do
     port = String.to_integer(System.get_env("PORT") || "1234")
 
-    topologies = [
-      example: [
-        strategy: Cluster.Strategy.Gossip
-      ]
-    ]
+    topologies = case System.get_env("CLUSTER_STRATEGY", "gossip") do
+      "epmd" ->
+        nodes = System.get_env("CLUSTER_NODES", "")
+          |> String.split(",", trim: true)
+          |> Enum.map(&String.to_atom/1)
+        [epmd: [strategy: Cluster.Strategy.Epmd, config: [hosts: nodes]]]
+      _ ->
+        [gossip: [strategy: Cluster.Strategy.Gossip]]
+    end
 
     # List all child processes to be supervised
     children = [
